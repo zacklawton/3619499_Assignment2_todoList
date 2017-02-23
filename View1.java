@@ -1,32 +1,32 @@
 package edu.pitt.view;
 
+import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.List;
-import java.awt.TextField;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-import javax.swing.JTree.*;
+import javax.swing.JTree;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.MutableTreeNode;
+import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
 
 import edu.pitt.controller.AddButton;
 import edu.pitt.controller.AddNewUser;
 import edu.pitt.controller.Controller;
 import edu.pitt.controller.DeleteButton;
 import edu.pitt.controller.SaveNewUserButton;
-import edu.pitt.controller.User;
-import edu.pitt.model.ListItem;
-import edu.pitt.model.Model;
 
-public class View extends JFrame {
+public class View1 extends JFrame {
 	// Local Variables
 	private JFrame parentFrame;
 	private JFrame userFrame;
@@ -34,7 +34,7 @@ public class View extends JFrame {
 	private JPanel mPanel;
 	private JButton deleteButton;
 	private JTextField txtItem;
-	private JTextField txtUserLogin;
+	private JComboBox<String> cbLogin;
 	private JTextField txtFirstName;
 	private JTextField txtLastName;
 	private JLabel lblUserLogin = new JLabel("User ID:");
@@ -47,6 +47,12 @@ public class View extends JFrame {
 	private JButton btnOpenUserWindow = new JButton("New User");
 	private JList list1 = new JList();
 	private DefaultListModel listModel;
+	private JTree theTree;
+	private DefaultTreeModel treeModel;
+	private DefaultMutableTreeNode parent;
+	private DefaultMutableTreeNode child;
+	private DefaultMutableTreeNode listRoot = new DefaultMutableTreeNode("To Do List");
+	private JScrollPane scrollPane;
 
 	Controller controller;
 	AddButton save;
@@ -57,7 +63,7 @@ public class View extends JFrame {
 	/**
 	 * View Constructor
 	 */
-	public View() {
+	public View1() {
 		// Initialize the main frame of the GUI
 		initParentFrame();
 	}
@@ -68,7 +74,7 @@ public class View extends JFrame {
 	public void initParentFrame() {
 		// FRAME
 		parentFrame = new JFrame("To-Do List");
-		parentFrame.setBounds(5, 5, 400, 420);
+		parentFrame.setBounds(100, 100, 500, 320);
 		parentFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		parentFrame.getContentPane().setLayout(null);
 
@@ -87,28 +93,46 @@ public class View extends JFrame {
 		// Create the Panel
 		mPanel = new JPanel();
 		mPanel.setBorder(BorderFactory.createTitledBorder("Add an item to the list"));
-		mPanel.setSize(400, 415);
+		mPanel.setSize(500, 315);
 		FlowLayout layout = new FlowLayout();
 		mPanel.setLayout(layout);
 
 		// Create the text field to enter a list item
 		txtItem = new JTextField(21);
-		txtUserLogin = new JTextField(15);
+		String[] logins = { "1", "2", "3", "4", "5" };
+
+		cbLogin = new JComboBox<String>(logins);
 
 		// Add the text field and a save button to the panel
 		mPanel.add(lblUserLogin);
-		mPanel.add(txtUserLogin);
-		mPanel.add(btnOpenUserWindow);
+		mPanel.add(cbLogin);
+		// mPanel.add(btnOpenUserWindow);
 		mPanel.add(lblItemDesc);
 		mPanel.add(txtItem);
 
+		// JTree creation
+		// createJTree();
+
+		listRoot = new DefaultMutableTreeNode("To Do List");
+		treeModel = new DefaultTreeModel(listRoot);
+		// add a tree model listener here!!!!
+		theTree = new JTree(treeModel);
+		theTree.setEditable(false);
+		theTree.setVisibleRowCount(10);
+		theTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+
+		theTree.setShowsRootHandles(true);
+
+		scrollPane = new JScrollPane(theTree);
+		scrollPane.setPreferredSize(new Dimension(250, 200));
+
 		// Create a list model and a list
-		listModel = new DefaultListModel();
-		list1 = new JList(listModel);
-		list1.setVisibleRowCount(15);
-		JScrollPane scrollPane = new JScrollPane(list1);
-		scrollPane.setVisible(true);
-		scrollPane.setBorder(BorderFactory.createTitledBorder("To-Do List"));
+		// listModel = new DefaultListModel();
+		// list1 = new JList(listModel);
+		// list1.setVisibleRowCount(15);
+		// JScrollPane scrollPane = new JScrollPane(list1);
+		// scrollPane.setVisible(true);
+		// scrollPane.setBorder(BorderFactory.createTitledBorder("To-Do List"));
 
 		// Creates a delete button
 		deleteButton = new JButton("Delete Item");
@@ -145,7 +169,6 @@ public class View extends JFrame {
 
 		txtFirstName = new JTextField(15);
 		txtLastName = new JTextField(15);
-		txtUserLogin = new JTextField(15);
 		this.btnUserSave = new JButton("Save User");
 
 		/**
@@ -158,7 +181,6 @@ public class View extends JFrame {
 		uPanel.add(txtLastName);
 
 		uPanel.add(lblID);
-		uPanel.add(txtUserLogin);
 
 		uPanel.add(btnUserSave);
 
@@ -205,12 +227,8 @@ public class View extends JFrame {
 	}
 
 	public String getTxtUserLogin() {
-		String user = txtUserLogin.getText();
+		String user = cbLogin.getSelectedItem().toString();
 		return user;
-	}
-
-	public void setTxtUserLogin(JTextField txtUserLogin) {
-		this.txtUserLogin = txtUserLogin;
 	}
 
 	/**
@@ -253,9 +271,8 @@ public class View extends JFrame {
 	 *            a String of the entered user ID
 	 */
 	public void setItem(String userID) {
-		String item = txtItem.getText();// + " [ID: " + userID + "]";
+		String item = txtItem.getText();
 		listModel.addElement(item);
-		//System.out.println(item);
 	}
 
 	/**
@@ -316,6 +333,95 @@ public class View extends JFrame {
 	 */
 	public JList getList1() {
 		return list1;
+	}
+
+	private void createJTree() {
+		listRoot = new DefaultMutableTreeNode("To Do List");
+		treeModel = new DefaultTreeModel(listRoot);
+		// add a tree model listener here!!!!
+		theTree = new JTree(treeModel);
+		theTree.setEditable(false);
+		theTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+		theTree.setShowsRootHandles(true);
+
+		scrollPane = new JScrollPane(theTree);
+		
+	}
+
+	/**
+	 * Clear all of the nodes from the tree except for the root node
+	 */
+	public void clearTree() {
+		listRoot.removeAllChildren();
+		treeModel.reload();
+	}
+
+	/**
+	 * get the selected node in the from the JTree
+	 * @return r  the selected node as a string
+	 */
+	public String getSelectedNode() {
+		TreePath selected = theTree.getSelectionPath();
+		String r = selected.getLastPathComponent().toString();
+		return r;
+	}
+
+	/**
+	 * remove a node from the JTree
+	 */
+	public void removeSelectedNode() {
+		//get the selected node
+		TreePath selected = theTree.getSelectionPath();
+		
+		//if not blank, set currentNode to the selected item and save its parent.
+		if (selected != null) {
+			DefaultMutableTreeNode currentNode = (DefaultMutableTreeNode) (selected.getLastPathComponent());
+			MutableTreeNode parent = (MutableTreeNode) (currentNode.getParent());
+			//if the parent is not blank, remove the node
+			if (parent != null) {
+				treeModel.removeNodeFromParent(currentNode);
+				return;
+			}
+		}
+	}
+
+	/**
+	 * add a node to the tree
+	 * @param child
+	 * @return 
+	 */
+	public DefaultMutableTreeNode addNode(Object child) {
+		DefaultMutableTreeNode parentNode = null;
+		TreePath parentPath = theTree.getSelectionPath();
+
+		// if the parent path is empty, then parentNode is the root
+		if (parentPath == null) {
+			parentNode = listRoot;
+		} else {
+			// otherwise parentNode is the selected node
+			parentNode = (DefaultMutableTreeNode) (parentPath.getLastPathComponent());
+		}
+
+		return addNode(parentNode, child, true);
+	}
+
+	public DefaultMutableTreeNode addNode(DefaultMutableTreeNode parent, Object child) {
+		return addNode(parent, child, false);
+	}
+
+	public DefaultMutableTreeNode addNode(DefaultMutableTreeNode parent, Object child, boolean shouldBeVisible) {
+		DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(child);
+
+		if (parent == null) {
+			parent = listRoot;
+		}
+
+		treeModel.insertNodeInto(childNode, parent, parent.getChildCount());
+
+		if (shouldBeVisible) {
+			theTree.scrollPathToVisible(new TreePath(childNode.getPath()));
+		}
+		return childNode;
 	}
 
 }
